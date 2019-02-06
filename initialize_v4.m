@@ -13,8 +13,7 @@ There are many subfunctions utilized
 % create_time_UI and calls a later version of import_directory
 close all;
 clearvars % clear variables
-addpath('data','figs','exports','src','functions',...
-    'functions/data-extraction','functions/data-analysis','functions/exportFig'); % add all (sub)folders to search path
+addpath('data-extraction','data-analysis'); % add all (sub)folders to search path
 % savepath; % save current search path to an existing pathdef.m file 
 
 [fileList,currentAppValue] = import_directory_v3; % get all files from directory thru a gui
