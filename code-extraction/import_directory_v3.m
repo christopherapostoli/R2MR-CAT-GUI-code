@@ -24,7 +24,9 @@ function [fileList,currentAppValue] = import_directory_v3
     
     % asks user to select files they want analyzed - opens explorer dialog
     analFiles = uigetfile('*.txt','Select Analytics Files to Open','MultiSelect','on'); % for analytics files
+    fprintf('ANALYSIS fileS chosen: %s\n',analFiles);
     datFiles = uigetfile('*.txt','Select Data Files to Open','MultiSelect','on'); % for data files
+    fprintf('DATA fileS chosen: %s\n',datFiles);
     
     if ischar(analFiles) || ischar(datFiles) % checks if there is only one file, and if so, convert from char to cell
         analFiles = {analFiles};

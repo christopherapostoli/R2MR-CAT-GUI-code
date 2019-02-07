@@ -13,14 +13,15 @@ There are many subfunctions utilized
 % create_time_UI and calls a later version of import_directory
 close all;
 clearvars % clear variables
-addpath('data-extraction','data-analysis'); % add all (sub)folders to search path
+addpath('code-extraction','code-analysis','data'); % add all (sub)folders to search path
 % savepath; % save current search path to an existing pathdef.m file 
 
 [fileList,currentAppValue] = import_directory_v3; % get all files from directory thru a gui
 % after this function, you have a cell array containing the NAMES of the
 % files you wish to analyze, and the selection of which app you want to
 % analyze should be in the main workspace
-outputDir = 'C:\Users\christopher.apostoli\Documents\Josh Granek\MATLAB Script Package_Chris\MatLAB Scripts_V6\MatLAB Scripts_V5\R2MR_CAT_Output.xlsx'; %Master File
+% outputDir = 'C:\Users\christopher.apostoli\Documents\Josh Granek\MATLAB Script Package_Chris\MatLAB Scripts_V6\MatLAB Scripts_V5\R2MR_CAT_Output.xlsx'; %Master File
+outputDir = 'C:\Users\apostoli\Documents\GitHub\R2MR-CAT-GUI-code\data\R2MR_CAT_Output.xlsx'; %Master spreadsheet;
 
 %Use as default
 % fileList =     [{'analytics_CAT_User2.txt'}    {'data_CAT_User2.txt'}

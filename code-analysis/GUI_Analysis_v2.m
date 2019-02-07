@@ -91,7 +91,7 @@ generateMetricButton = uicontrol('Style','pushbutton','String','Generate Data an
 
 % No Data to Display message to the user if there's no data to be seen
 hMessageErrorData = uicontrol('Style','text','String','No data to display','ForegroundColor','r',...
-        'Visible','on','Position',[220,570,80,75],'Units','normalized','FontSize',14,'FontWeight','bold');
+        'Visible','on','Position',[230,570,80,100],'Units','normalized','FontSize',14,'FontWeight','bold');
 
 %---------------------------------------------------------------------------------------------
 % 'Enter START Date to exclude from data' 

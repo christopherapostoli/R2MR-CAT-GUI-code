@@ -223,9 +223,9 @@ if ~isempty(userClickPage) %Make sure there is data
     %         resultClickData{i,5} = selectedUsers(indUser); %Value = users  
         elseif strcmp(currentMetricValue,metric(5)) %'Percentage of clicks on sub-app'
             indNonZeroNaN = (outputClick.totalClickPagePercent(indUser,i) ~= 0) & ~isnan(outputClick.totalClickPagePercent(indUser,i)); %Index of non zero inputs
-            resultClickData{i,2} = nanmean(outputClick.totalClickPagePercent(indNonZeroNaN,i)); %Value = sum
-            resultClickData{i,3} = nanstd(outputClick.totalClickPagePercent(indNonZeroNaN,i)); %Value = std
-            resultClickData{i,4} = nanstd(outputClick.totalClickPagePercent(indNonZeroNaN,i))/sqrt(length(outputClick.totalClickPagePercent(indNonZeroNaN,i))); %Value = sem
+            resultClickData{i,2} = 100 * nanmean(outputClick.totalClickPagePercent(indNonZeroNaN,i)); %Value = sum
+            resultClickData{i,3} = 100 * nanstd(outputClick.totalClickPagePercent(indNonZeroNaN,i)); %Value = std
+            resultClickData{i,4} = 100 * nanstd(outputClick.totalClickPagePercent(indNonZeroNaN,i))/sqrt(length(outputClick.totalClickPagePercent(indNonZeroNaN,i))); %Value = sem
             resultClickData{i,5} = sum(indNonZeroNaN); %Value = num of users
             resultClickData{i,6} = selectedUsers(indNonZeroNaN,1); %Value = users
             resultClickData{i,7} = selectedUsers(~indNonZeroNaN,1); %Value = users not in data

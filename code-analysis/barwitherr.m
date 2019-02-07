@@ -114,7 +114,7 @@ if any(size(values) ~= size(lowerErrors))
     error('The values and errors have to be the same length')
 end
 
-[nRows nCols] = size(values);
+[nRows, nCols] = size(values); 
 handles.bar = bar(varargin{:}); % standard implementation of bar fn
 hold on
 hBar = handles.bar;

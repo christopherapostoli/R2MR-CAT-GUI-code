@@ -186,9 +186,9 @@ if ~isempty(perPageTime.userID) %Make sure there is data
                 resultTimeFreqData{i,7} = selectedUsers(~indNonZeroNaN,1); %Value = users not in data
             elseif strcmp(currentMetricValue,metric(5)) %'Percentage of time on sub-app'
                 indNonZeroNaN = (outputTime.totalTimePagePercent(indUser,i) ~= 0) & ~isnan(outputTime.totalTimePagePercent(indUser,i)); %Index of non zero inputs
-                resultTimeFreqData{i,2} = nanmean(outputTime.totalTimePagePercent(indNonZeroNaN,i)); %Value = sum
-                resultTimeFreqData{i,3} = nanstd(outputTime.totalTimePagePercent(indNonZeroNaN,i)); %Value = std
-                resultTimeFreqData{i,4} = nanstd(outputTime.totalTimePagePercent(indNonZeroNaN,i))/sqrt(length(outputTime.totalTimePagePercent(indNonZeroNaN,i))); %Value = sem
+                resultTimeFreqData{i,2} = 100 * nanmean(outputTime.totalTimePagePercent(indNonZeroNaN,i)); %Value = sum
+                resultTimeFreqData{i,3} = 100 * nanstd(outputTime.totalTimePagePercent(indNonZeroNaN,i)); %Value = std
+                resultTimeFreqData{i,4} = 100 * nanstd(outputTime.totalTimePagePercent(indNonZeroNaN,i))/sqrt(length(outputTime.totalTimePagePercent(indNonZeroNaN,i))); %Value = sem
                 resultTimeFreqData{i,5} = sum(indNonZeroNaN); %Value = num of users
                 resultTimeFreqData{i,6} = selectedUsers(indNonZeroNaN,1); %Value = users
                 resultTimeFreqData{i,7} = selectedUsers(~indNonZeroNaN,1); %Value = users not in data
@@ -233,9 +233,9 @@ if ~isempty(perPageTime.userID) %Make sure there is data
         %         resultFreqData{i,5} = selectedUsers(indUser); %Value = users
             elseif strcmp(currentMetricValue,metric(3)) %'Percentage of time on sub-app'
                 indNonZeroNaN = (outputFreq.totalFreqPagePercent(indUser,i) ~= 0) & ~isnan(outputFreq.totalFreqPagePercent(indUser,i)); %Index of non zero inputs
-                resultTimeFreqData{i,2} = nanmean(outputFreq.totalFreqPagePercent(indNonZeroNaN,i)); %Value = sum
-                resultTimeFreqData{i,3} = nanstd(outputFreq.totalFreqPagePercent(indNonZeroNaN,i)); %Value = std
-                resultTimeFreqData{i,4} = nanstd(outputFreq.totalFreqPagePercent(indNonZeroNaN,i))/sqrt(length(outputFreq.totalFreqPagePercent(indNonZeroNaN,i))); %Value = sem
+                resultTimeFreqData{i,2} = 100 * nanmean(outputFreq.totalFreqPagePercent(indNonZeroNaN,i)); %Value = sum
+                resultTimeFreqData{i,3} = 100 * nanstd(outputFreq.totalFreqPagePercent(indNonZeroNaN,i)); %Value = std
+                resultTimeFreqData{i,4} = 100 * nanstd(outputFreq.totalFreqPagePercent(indNonZeroNaN,i))/sqrt(length(outputFreq.totalFreqPagePercent(indNonZeroNaN,i))); %Value = sem
                 resultTimeFreqData{i,5} = sum(indNonZeroNaN); %Value = num of users
                 resultTimeFreqData{i,6} = selectedUsers(indNonZeroNaN,1); %Value = users in data
                 resultTimeFreqData{i,7} = selectedUsers(~indNonZeroNaN,1); %Value = users not in data 

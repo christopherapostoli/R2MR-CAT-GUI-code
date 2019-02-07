@@ -26,6 +26,7 @@ function deviceData = parseEvents(file)
         fileContents = fileContents(4:end); % there are some weird characters before the JSON proper starts
         value = jsondecode(fileContents);
         deviceData = extractfield(value,'doc'); % only extract the 4th field - the rest is useless info
+        fclose(fid); % Close the file
     else    
         tline = fgetl(fid); % read line from file, removing newline characters
         while ischar(tline) % while input is a character array...
