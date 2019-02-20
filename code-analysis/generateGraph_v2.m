@@ -16,5 +16,5 @@ elseif strcmp(currentMetricTypeValue,'Time')
 else
     ylabel('Count (#)');
 end
-set(gca,'XtickLabel',routeSubApp);
+set(gca,'XTick',1:length(routeSubApp),'XtickLabel',routeSubApp);
 set(gca,'XtickLabelRotation',15);

@@ -21,7 +21,8 @@ addpath('code-extraction','code-analysis','data'); % add all (sub)folders to sea
 % files you wish to analyze, and the selection of which app you want to
 % analyze should be in the main workspace
 % outputDir = 'C:\Users\christopher.apostoli\Documents\Josh Granek\MATLAB Script Package_Chris\MatLAB Scripts_V6\MatLAB Scripts_V5\R2MR_CAT_Output.xlsx'; %Master File
-outputDir = 'C:\Users\apostoli\Documents\GitHub\R2MR-CAT-GUI-code\data\R2MR_CAT_Output.xlsx'; %Master spreadsheet;
+% outputDir = 'C:\Users\apostoli\Documents\GitHub\R2MR-CAT-GUI-code\data\R2MR_CAT_Output.xlsx'; %At home - Master spreadsheet;
+outputDir = 'C:\Users\christopher.apostoli\Documents\GitHub\R2MR-CAT-GUI-code\code-analysis'; %At work computer - Master spreadsheet;
 
 %Use as default
 % fileList =     [{'analytics_CAT_User2.txt'}    {'data_CAT_User2.txt'}

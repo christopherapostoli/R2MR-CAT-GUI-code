@@ -544,10 +544,7 @@ function exportDataButton_Callback(source,eventdata)
         horzcat('A3:E',num2str(3+size(hTableData.Data,1)))); %Write Data Table
 
 
-    
-    
-    
-    
+       
 end
 
 % ------------------ Figures Button ---------------------------------
