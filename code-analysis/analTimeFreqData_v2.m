@@ -1,4 +1,4 @@
-function [resultTimeFreqData,subRoutes] = analTimeFreqData_v2(selectedUsers,currentMetricValue,metric,userTimeData,selectRoute)
+function [resultTimeFreqData,subRoutes,subRoutesParse] = analTimeFreqData_v2(selectedUsers,currentMetricValue,metric,userTimeData,selectRoute)
 %% Analyse Data - TIME
 %Let's now create an output with all the desired metrics
 %Parameters users can pick
@@ -15,6 +15,24 @@ allRoutes = unique(cellfun(@num2str,{userTimeData.destination},'uni',0));
 %Find all subroutes
 indMainRoute = strcmp(regexp(allRoutes, '[^.]+(?<=.)', 'match', 'once'),selectRoute);
 subRoutes = allRoutes(indMainRoute);
+
+%Find main route
+try 
+    %Multiple routes exist
+    routeSubApp = strsplit(subRoutes{1},'.');
+    mainRoute = routeSubApp{1};
+    %Remove main Route from all route names if there is another proceeding field 
+    if any(contains(subRoutes,horzcat(mainRoute,'.')) & cellfun('length',subRoutes)-length(mainRoute) >= 1)
+        idxRoutes = (contains(subRoutes,horzcat(mainRoute,'.')) & cellfun('length',subRoutes)-length(mainRoute) >= 1);
+        subRoutesParse = erase(subRoutes(idxRoutes),horzcat(mainRoute,'.'));
+    else
+        subRoutesParse = subRoutes;
+    end
+catch
+    %There is only on route, set vars to the one route
+    mainRoute = subRoutes;
+    subRoutesParse = subRoutes; 
+end
 
 %% Per page analysis
 
@@ -143,85 +161,87 @@ if ~isempty(perPageTime.userID) %Make sure there is data
     end
 
     if any(contains(metric,'Time'))
-        resultTimeFreqData = cell(size(subRoutes,2),4);
+        resultTimeFreqData = cell(size(subRoutes,2),8);
         % Analyse Data
         for i = 1:size(subRoutes,2)
 
             %Find index of users selected
             indUser = strcmp(outputTime.userID,selectedUsers(:,1));
-            resultTimeFreqData(i,1) = subRoutes(i); %Route name
-
+            resultTimeFreqData(i,1) = {mainRoute}; %All Route name
+            resultTimeFreqData(i,2) = subRoutesParse(i); %Sub Route name 
+            
             % Generate Table with appropriate column names based on metric
             if strcmp(currentMetricValue,metric(1)) %'Total time'
                 indNonZeroNaN = (outputTime.totalTimeSum(indUser,i) ~= 0) & ~isnan(outputTime.totalTimeSum(indUser,i)); %Index of non zero inputs
-                resultTimeFreqData{i,2} = nansum(outputTime.totalTimeSum(indNonZeroNaN,i)); %Value = sum
-                resultTimeFreqData{i,3} = nanstd(outputTime.totalTimeSum(indNonZeroNaN,i)); %Value = std
-                resultTimeFreqData{i,4} = nanstd(outputTime.totalTimeSum(indNonZeroNaN,i))/sqrt(length(outputTime.totalTimeSum(indNonZeroNaN,i))); %Value = sem
-                resultTimeFreqData{i,5} = sum(indNonZeroNaN); %Value = num of users
-                resultTimeFreqData{i,6} = selectedUsers(indNonZeroNaN,1); %Value = users in data
-                resultTimeFreqData{i,7} = selectedUsers(~indNonZeroNaN,1); %Value = users not in data
+                resultTimeFreqData{i,3} = nansum(outputTime.totalTimeSum(indNonZeroNaN,i)); %Value = sum
+                resultTimeFreqData{i,4} = nanstd(outputTime.totalTimeSum(indNonZeroNaN,i)); %Value = std
+                resultTimeFreqData{i,5} = nanstd(outputTime.totalTimeSum(indNonZeroNaN,i))/sqrt(length(outputTime.totalTimeSum(indNonZeroNaN,i))); %Value = sem
+                resultTimeFreqData{i,6} = sum(indNonZeroNaN); %Value = num of users
+                resultTimeFreqData{i,7} = selectedUsers(indNonZeroNaN,1); %Value = users in data
+                resultTimeFreqData{i,8} = selectedUsers(~indNonZeroNaN,1); %Value = users not in data
             elseif strcmp(currentMetricValue,metric(2)) %'Average time per user'
                 indNonZeroNaN = (outputTime.totalTimeSum(indUser,i) ~= 0) & ~isnan(outputTime.totalTimeSum(indUser,i)); %Index of non zero inputs
-                resultTimeFreqData{i,2} = nanmean(outputTime.totalTimeSum(indNonZeroNaN,i)); %Value = mean
-                resultTimeFreqData{i,3} = nanstd(outputTime.totalTimeSum(indNonZeroNaN,i)); %Value = std
-                resultTimeFreqData{i,4} = nanstd(outputTime.totalTimeSum(indNonZeroNaN,i))/sqrt(length(outputTime.totalTimeSum(indNonZeroNaN,i))); %Value = sem
-                resultTimeFreqData{i,5} = sum(indNonZeroNaN); %Value = num of users
-                resultTimeFreqData{i,6} = selectedUsers(indNonZeroNaN,1); %Value = users
-                resultTimeFreqData{i,7} = selectedUsers(~indNonZeroNaN,1); %Value = users not in data
+                resultTimeFreqData{i,3} = nanmean(outputTime.totalTimeSum(indNonZeroNaN,i)); %Value = mean
+                resultTimeFreqData{i,4} = nanstd(outputTime.totalTimeSum(indNonZeroNaN,i)); %Value = std
+                resultTimeFreqData{i,5} = nanstd(outputTime.totalTimeSum(indNonZeroNaN,i))/sqrt(length(outputTime.totalTimeSum(indNonZeroNaN,i))); %Value = sem
+                resultTimeFreqData{i,6} = sum(indNonZeroNaN); %Value = num of users
+                resultTimeFreqData{i,7} = selectedUsers(indNonZeroNaN,1); %Value = users
+                resultTimeFreqData{i,8} = selectedUsers(~indNonZeroNaN,1); %Value = users not in data
             elseif strcmp(currentMetricValue,metric(3)) %'Average time per visit'
                 indNonZeroNaN = (outputTime.avgTimePerPage(indUser,i) ~= 0) & ~isnan(outputTime.avgTimePerPage(indUser,i)); %Index of non zero inputs
-                resultTimeFreqData{i,2} = nansum(outputTime.avgTimePerPage(indNonZeroNaN,i)); %Value = sum
-                resultTimeFreqData{i,3} = nanstd(outputTime.avgTimePerPage(indNonZeroNaN,i)); %Value = std
-                resultTimeFreqData{i,4} = nanstd(outputTime.avgTimePerPage(indNonZeroNaN,i))/sqrt(length(outputTime.avgTimePerPage(indNonZeroNaN,i))); %Value = sem
-                resultTimeFreqData{i,5} = sum(indNonZeroNaN); %Value = num of users
-                resultTimeFreqData{i,6} = selectedUsers(indNonZeroNaN,1); %Value = users
-                resultTimeFreqData{i,7} = selectedUsers(~indNonZeroNaN,1); %Value = users not in data
+                resultTimeFreqData{i,3} = nansum(outputTime.avgTimePerPage(indNonZeroNaN,i)); %Value = sum
+                resultTimeFreqData{i,4} = nanstd(outputTime.avgTimePerPage(indNonZeroNaN,i)); %Value = std
+                resultTimeFreqData{i,5} = nanstd(outputTime.avgTimePerPage(indNonZeroNaN,i))/sqrt(length(outputTime.avgTimePerPage(indNonZeroNaN,i))); %Value = sem
+                resultTimeFreqData{i,6} = sum(indNonZeroNaN); %Value = num of users
+                resultTimeFreqData{i,7} = selectedUsers(indNonZeroNaN,1); %Value = users
+                resultTimeFreqData{i,8} = selectedUsers(~indNonZeroNaN,1); %Value = users not in data
             elseif strcmp(currentMetricValue,metric(4)) %'Average time per visit per user' ****%Needs fixing
                 indNonZeroNaN = (outputTime.totalTimeSum(indUser,i) ~= 0) & ~isnan(outputTime.totalTimeSum(indUser,i)); %Index of non zero inputs
-                resultTimeFreqData{i,2} = nansum(outputTime.totalTimeSum(indNonZeroNaN,i)); %Value = sum
-                resultTimeFreqData{i,3} = nanstd(outputTime.totalTimeSum(indNonZeroNaN,i)); %Value = std
-                resultTimeFreqData{i,4} = nanstd(outputTime.totalTimeSum(indNonZeroNaN,i))/sqrt(length(outputTime.totalTimeSum(indNonZeroNaN,i))); %Value = sem
-                resultTimeFreqData{i,5} = sum(indNonZeroNaN); %Value = num of users
-                resultTimeFreqData{i,6} = selectedUsers(indNonZeroNaN,1); %Value = users
-                resultTimeFreqData{i,7} = selectedUsers(~indNonZeroNaN,1); %Value = users not in data
+                resultTimeFreqData{i,3} = nansum(outputTime.totalTimeSum(indNonZeroNaN,i)); %Value = sum
+                resultTimeFreqData{i,4} = nanstd(outputTime.totalTimeSum(indNonZeroNaN,i)); %Value = std
+                resultTimeFreqData{i,5} = nanstd(outputTime.totalTimeSum(indNonZeroNaN,i))/sqrt(length(outputTime.totalTimeSum(indNonZeroNaN,i))); %Value = sem
+                resultTimeFreqData{i,6} = sum(indNonZeroNaN); %Value = num of users
+                resultTimeFreqData{i,7} = selectedUsers(indNonZeroNaN,1); %Value = users
+                resultTimeFreqData{i,8} = selectedUsers(~indNonZeroNaN,1); %Value = users not in data
             elseif strcmp(currentMetricValue,metric(5)) %'Percentage of time on sub-app'
                 totalTime = nansum(nansum(outputTime.totalTimePagePercent)); %All time spent on each subapp as a percent
                 indNonZeroNaN = (outputTime.totalTimePagePercent(indUser,i) ~= 0) & ~isnan(outputTime.totalTimePagePercent(indUser,i)); %Index of non zero inputs
-                resultTimeFreqData{i,2} = nansum(outputTime.totalTimePagePercent(indNonZeroNaN,i))/totalTime; %Value = sum
-                resultTimeFreqData{i,3} = nanstd(outputTime.totalTimePagePercent(indNonZeroNaN,i)); %Value = std
-                resultTimeFreqData{i,4} = nanstd(outputTime.totalTimePagePercent(indNonZeroNaN,i))/sqrt(length(outputTime.totalTimePagePercent(indNonZeroNaN,i))); %Value = sem
-                resultTimeFreqData{i,5} = sum(indNonZeroNaN); %Value = num of users
-                resultTimeFreqData{i,6} = selectedUsers(indNonZeroNaN,1); %Value = users
-                resultTimeFreqData{i,7} = selectedUsers(~indNonZeroNaN,1); %Value = users not in data
+                resultTimeFreqData{i,3} = nansum(outputTime.totalTimePagePercent(indNonZeroNaN,i))/totalTime; %Value = sum
+                resultTimeFreqData{i,4} = nanstd(outputTime.totalTimePagePercent(indNonZeroNaN,i)); %Value = std
+                resultTimeFreqData{i,5} = nanstd(outputTime.totalTimePagePercent(indNonZeroNaN,i))/sqrt(length(outputTime.totalTimePagePercent(indNonZeroNaN,i))); %Value = sem
+                resultTimeFreqData{i,6} = sum(indNonZeroNaN); %Value = num of users
+                resultTimeFreqData{i,7} = selectedUsers(indNonZeroNaN,1); %Value = users
+                resultTimeFreqData{i,8} = selectedUsers(~indNonZeroNaN,1); %Value = users not in data
             end
         end
 
     else
         % Analyse Data
-        resultTimeFreqData = cell(size(subRoutes,2),4);
+        resultTimeFreqData = cell(size(subRoutes,2),8);
         for i = 1:size(subRoutes,2)
 
             %Find index of users selected
             indUser = strcmp(outputFreq.userID,selectedUsers(:,1));
-            resultTimeFreqData(i,1) = subRoutes(i); %Route name
-
+            resultTimeFreqData(i,1) = {mainRoute}; %All Route name
+            resultTimeFreqData(i,2) = subRoutesParse(i); %Sub Route name
+            
             % Generate Table with appropriate column names based on metric
             if strcmp(currentMetricValue,metric(1)) %'Total Freq'
                 indNonZeroNaN = (outputFreq.totalFreqSum(indUser,i) ~= 0) & ~isnan(outputFreq.totalFreqSum(indUser,i)); %Index of non zero inputs
-                resultTimeFreqData{i,2} = nansum(outputFreq.totalFreqSum(indNonZeroNaN,i)); %Value = sum
-                resultTimeFreqData{i,3} = nanstd(outputFreq.totalFreqSum(indNonZeroNaN,i)); %Value = std
-                resultTimeFreqData{i,4} = nanstd(outputFreq.totalFreqSum(indNonZeroNaN,i))/sqrt(length(outputFreq.totalFreqSum(indNonZeroNaN,i))); %Value = sem
-                resultTimeFreqData{i,5} = sum(indNonZeroNaN); %Value = num of users
-                resultTimeFreqData{i,6} = selectedUsers(indNonZeroNaN,1); %Value = users in data
-                resultTimeFreqData{i,7} = selectedUsers(~indNonZeroNaN,1); %Value = users not in data 
+                resultTimeFreqData{i,3} = nansum(outputFreq.totalFreqSum(indNonZeroNaN,i)); %Value = sum
+                resultTimeFreqData{i,4} = nanstd(outputFreq.totalFreqSum(indNonZeroNaN,i)); %Value = std
+                resultTimeFreqData{i,5} = nanstd(outputFreq.totalFreqSum(indNonZeroNaN,i))/sqrt(length(outputFreq.totalFreqSum(indNonZeroNaN,i))); %Value = sem
+                resultTimeFreqData{i,6} = sum(indNonZeroNaN); %Value = num of users
+                resultTimeFreqData{i,7} = selectedUsers(indNonZeroNaN,1); %Value = users in data
+                resultTimeFreqData{i,8} = selectedUsers(~indNonZeroNaN,1); %Value = users not in data 
             elseif strcmp(currentMetricValue,metric(2)) %'Average time per user
                 indNonZeroNaN = (outputFreq.totalFreqSum(indUser,i) ~= 0) & ~isnan(outputFreq.totalFreqSum(indUser,i)); %Index of non zero inputs
-                resultTimeFreqData{i,2} = nanmean(outputFreq.totalFreqSum(indNonZeroNaN,i)); %Value = mean
-                resultTimeFreqData{i,3} = nanstd(outputFreq.totalFreqSum(indNonZeroNaN,i)); %Value = std
-                resultTimeFreqData{i,4} = nanstd(outputFreq.totalFreqSum(indNonZeroNaN,i))/sqrt(length(outputFreq.totalFreqSum(indNonZeroNaN,i))); %Value = sem
-                resultTimeFreqData{i,5} = sum(indNonZeroNaN); %Value = num of users
-                resultTimeFreqData{i,6} = selectedUsers(indNonZeroNaN,1); %Value = users in data
-                resultTimeFreqData{i,7} = selectedUsers(~indNonZeroNaN,1); %Value = users not in data 
+                resultTimeFreqData{i,3} = nanmean(outputFreq.totalFreqSum(indNonZeroNaN,i)); %Value = mean
+                resultTimeFreqData{i,4} = nanstd(outputFreq.totalFreqSum(indNonZeroNaN,i)); %Value = std
+                resultTimeFreqData{i,5} = nanstd(outputFreq.totalFreqSum(indNonZeroNaN,i))/sqrt(length(outputFreq.totalFreqSum(indNonZeroNaN,i))); %Value = sem
+                resultTimeFreqData{i,6} = sum(indNonZeroNaN); %Value = num of users
+                resultTimeFreqData{i,7} = selectedUsers(indNonZeroNaN,1); %Value = users in data
+                resultTimeFreqData{i,8} = selectedUsers(~indNonZeroNaN,1); %Value = users not in data 
         %     elseif strcmp(currentMetricValue,metric(3)) %'Average time per visit'
         %         resultFreqData{i,2} = nansum(outputFreq.avgFreqPerPage(indUser,i)); %Value = sum
         %         resultFreqData{i,3} = nanstd(outputFreq.avgFreqPerPage(indUser,i)); %Value = std
@@ -235,18 +255,18 @@ if ~isempty(perPageTime.userID) %Make sure there is data
             elseif strcmp(currentMetricValue,metric(3)) %'Percentage of time on sub-app'
                 totalFreq = nansum(nansum(outputFreq.totalFreqPagePercent)); %All visits on each subapp as a percent
                 indNonZeroNaN = (outputFreq.totalFreqPagePercent(indUser,i) ~= 0) & ~isnan(outputFreq.totalFreqPagePercent(indUser,i)); %Index of non zero inputs
-                resultTimeFreqData{i,2} = sum(outputFreq.totalFreqPagePercent(indNonZeroNaN,i))/totalFreq; %Value = sum
-                resultTimeFreqData{i,3} = nanstd(outputFreq.totalFreqPagePercent(indNonZeroNaN,i)); %Value = std
-                resultTimeFreqData{i,4} = nanstd(outputFreq.totalFreqPagePercent(indNonZeroNaN,i))/sqrt(length(outputFreq.totalFreqPagePercent(indNonZeroNaN,i))); %Value = sem
-                resultTimeFreqData{i,5} = sum(indNonZeroNaN); %Value = num of users
-                resultTimeFreqData{i,6} = selectedUsers(indNonZeroNaN,1); %Value = users in data
-                resultTimeFreqData{i,7} = selectedUsers(~indNonZeroNaN,1); %Value = users not in data 
+                resultTimeFreqData{i,3} = sum(outputFreq.totalFreqPagePercent(indNonZeroNaN,i))/totalFreq; %Value = sum
+                resultTimeFreqData{i,4} = nanstd(outputFreq.totalFreqPagePercent(indNonZeroNaN,i)); %Value = std
+                resultTimeFreqData{i,5} = nanstd(outputFreq.totalFreqPagePercent(indNonZeroNaN,i))/sqrt(length(outputFreq.totalFreqPagePercent(indNonZeroNaN,i))); %Value = sem
+                resultTimeFreqData{i,6} = sum(indNonZeroNaN); %Value = num of users
+                resultTimeFreqData{i,7} = selectedUsers(indNonZeroNaN,1); %Value = users in data
+                resultTimeFreqData{i,8} = selectedUsers(~indNonZeroNaN,1); %Value = users not in data 
             end
 
         end  
 
     end
 else 
-    resultTimeFreqData = [];
+    resultTimeFreqData = cell(size(subRoutes,2),8);
 end
 end

@@ -50,7 +50,7 @@ elseif (~isempty(paramTable) || any([paramTable{:,end}] == 1)) && (isempty(dateI
             %entered into the table. We need to switch is back to a num so
             %that we can find it in the Param table.
             tempNum = str2double(include.Criteria{i,1});
-            indSame(:,i) = ([deviceData.(include.Param{i,1}){:}] == tempNum)'; %Create list of users that meet the criteria     
+            indSame(:,i) = (str2double(deviceData.(include.Param{i,1}){:}) == tempNum || deviceData.(include.Param{i,1}) == tempNum)'; %Create list of users that meet the criteria     
         else %String
             %The criteria is a string, search for string in Param Table
             indSame(:,i) = strcmp(deviceData.(include.Param{i,1}),include.Criteria(i,1))'; %Create list of users that meet the criteria

@@ -125,20 +125,20 @@ hMessageErrorDataExists = uicontrol('Style','text','String','Not Unique','Foregr
 % Param DISPLAY - show criteria the user can select
 %Display Paramter Criteria
 dispParamText = uicontrol('Style','text','String','Display Param Criteria',...
-    'Position',[35,115,250,30],'Units','normalized','FontSize',15,'FontWeight','bold');
+    'Position',[699.0,427.0,250.0,30],'Units','normalized','FontSize',15,'FontWeight','bold');
 dataParamFieldText = uicontrol('Style','text','String','Select Param:',...
-    'Position',[5,85,115,25],'Units','normalized','FontSize',12,'FontWeight','bold');
+    'Position',[675.0,381,115.0,25],'Units','normalized','FontSize',12,'FontWeight','bold');
 dataParamFieldDrop = uicontrol('Style','popupmenu','String',paramFields,...
-    'Position',[130,90,150,25],'Callback',@dataParam_Callback,'Units','normalized');
+    'Position',[818.0,380,150,25.0],'Callback',@dataParam_Callback,'Units','normalized');
 dataParamCriteraText = uicontrol('Style','text','String','Select Criteria:',...
-    'Position',[2,50,120,25],'Units','normalized','FontSize',12,'FontWeight','bold');
+    'Position',[679.0,344.0,120,25],'Units','normalized','FontSize',12,'FontWeight','bold');
 dataParamCriteraDrop = uicontrol('Style','popupmenu','String',{'Select'},...
-    'Position',[130,50,150,25],'Units','normalized');
+    'Position',[816.0,347,150,25.0],'Units','normalized');
 % No Data to Display message to the user if there's no data to be seen
 hMessageErrorCriteriaNoData = uicontrol('Style','text','String','No Data','ForegroundColor','r',...
-        'Visible','off','Position',[285,60,45,50],'Units','normalized','FontSize',14,'FontWeight','bold');
+        'Visible','off','Position',[420,301,150,50],'Units','normalized','FontSize',14,'FontWeight','bold');
 hMessageErrorCriteriaExists = uicontrol('Style','text','String','Not Unique','ForegroundColor','r',...
-        'Visible','off','Position',[285,60,80,50],'Units','normalized','FontSize',14,'FontWeight','bold'); 
+        'Visible','off','Position',[745,307,150,50],'Units','normalized','FontSize',14,'FontWeight','bold'); 
 %---------------------------------------------------------------------------------------------
 %PARAMTER table - extracted from Data txt files
 % paramText = uicontrol('Style','text','String','Parameters:',...
@@ -172,21 +172,25 @@ deselectAllUserButton = uicontrol('Style','pushbutton','String','Deselect All',.
 
 %Display Time
 dispTimeText = uicontrol('Style','text','String','Display Date Timeframe',...
-    'Position',[25,230,250,30],'Units','normalized','FontSize',15,'FontWeight','bold');
+    'Position',[407.0,426.0,250.0,30],'Units','normalized','FontSize',15,'FontWeight','bold');
 dataStartDateText = uicontrol('Style','text','String','Start Data:',...
-    'Position',[10,185,85,30],'Units','normalized','FontSize',12,'FontWeight','bold');
+    'Position',[344.0,380,85.0,30],'Units','normalized','FontSize',12,'FontWeight','bold');
 dataStartInput = uicontrol('Style','edit','String','dd-mm-yyyy hh:mm:ss',...
-    'Position',[110,190,180,30],'Units','normalized','FontSize',10,'FontWeight','bold');  
+    'Position',[450.0,381,150.0,30],'Units','normalized','FontSize',10,'FontWeight','bold');  
 % 'Enter END Date to exclude from data'
 dataEndText = uicontrol('Style','text','String','End Data:',...
-    'Position',[10,145,85,30],'Units','normalized','FontSize',12,'FontWeight','bold');
+    'Position',[343.0,340.0,85.0,30],'Units','normalized','FontSize',12,'FontWeight','bold');
 dataEndInput = uicontrol('Style','edit','String','dd-mm-yyyy hh:mm:ss', ...
-    'Position',[110,155,180,30],'Units','normalized','FontSize',10,'FontWeight','bold');
+    'Position',[446.0,341,150.0,25.0],'Units','normalized','FontSize',10,'FontWeight','bold');
 
 %---------------------------------------------------------------------------------------------
 % PPT DATA - the table that lists the data 
-hTableData = uitable('Parent',f,'Data',[],'ColumnName',{'','','','','',''},...
+hTableDataTime = uitable('Parent',f,'Data',[],'ColumnName',{'','','','','',''},...
     'ColumnWidth',{'auto','auto','auto','auto','auto','auto'},'Position',[710,470,480,305],'Units','normalized');
+hTableDataClick = uitable('Parent',f,'Data',[],'ColumnName',{'','','','','',''},...
+    'ColumnWidth',{'auto','auto','auto','auto','auto','auto'},'Position',[10.0,35,520,245],'Units','normalized');
+hTableDataFreq = uitable('Parent',f,'Data',[],'ColumnName',{'','','','','',''},...
+    'ColumnWidth',{'auto','auto','auto','auto','auto','auto'},'Position',[645,40,520,245],'Units','normalized');
 % export data and figure buttons
 exportDataButton = uicontrol('Style','pushbutton','String','Export Data','Fontsize',13,'Fontweight','bold', ...
     'Position',[20,10,200,30],'Callback',@exportDataButton_Callback,'Units','normalized');
@@ -204,7 +208,7 @@ figExportSuccessFeedback = uicontrol('Style','text','String','Graph export succe
 %--------------------------------- Generate Graph -------------------------------------------
 % open a graph for plotting the data
 % hChart = axes('Position',[395,145,780,275],'Units','pixels');
-hChart = axes('Position',[0.364166666666667,0.183333333333333,0.619166666666667,0.352564102564103],'Units','normalized');
+%hChart = axes('Position',[0.364166666666667,0.183333333333333,0.619166666666667,0.352564102564103],'Units','normalized');
 movegui(f,'center');
 fprintf('... GUI has succefully been created.\n');
 
@@ -310,30 +314,95 @@ end
 % ------------------ METRIC VALUE Button ---------------------------------
 % Program push button: Function dictates actions when button is clicked
 function generateMetricButton_Callback(source,eventdata)
-
-    %Display on a graph the users metric value for all routes based on:
-    % - metric type, metric value
-    %Find MetricType of data
-    hMessageErrorData.Visible = 'off'; % turn off 'No data to display' message
-    hMessageErrorDataExists.Visible = 'off'; %Turn on error message
-    fprintf("Route: %s || Type: %s || Metric: %s ... ",selectRoute,currentMetricTypeValue,currentMetricValue);
+    
+    for m = 1:length(mainRoutes)
         
-    %Determine Time and Users to include
-    if strcmp(currentMetricTypeValue,metricType{1,1}) %Time
-        %Check if there's data
-        if ~isempty(userDataTime)
-            
+        selectRoute = mainRoutes{m};
+        
+        %Display on a graph the users metric value for all routes based on:
+        % - metric type, metric value
+        %Find MetricType of data
+        hMessageErrorData.Visible = 'off'; % turn off 'No data to display' message
+        hMessageErrorDataExists.Visible = 'off'; %Turn on error message
+        
+        %Write to UITable    
+        metricSplit = strsplit(currentMetricValue,' ');
+        metricSplitTime = metricSplit;
+        metricSplitTime{2} = 'Time';
+        metricSplitTime = strjoin(metricSplitTime,' '); 
+        metricSplitClick = metricSplit;
+        metricSplitClick{2} = 'Clicks';
+        metricSplitClick = strjoin(metricSplitClick,' ');
+        metricSplitFreq = metricSplit;
+        metricSplitFreq{2} = 'Frequency';
+        metricSplitFreq = strjoin(metricSplitFreq,' ');
+
+        fprintf("Route: %s || Type: %s || Metric: %s ... ",selectRoute,currentMetricTypeValue,currentMetricValue);
+
+        %Acquire CLICK data        
+        assignin('base','userTimeData',userDataTime);  % assign the following variables to the main workspace to be used elsewhere
+        assignin('base','userClickData',userDataClick);  % assign the following variables to the main workspace to be used elsewhere
+        assignin('base','userTransData',userDataTrans);  % assign the following variables to the main workspace to be used elsewhere
+
+        %Determine Time and Users to include
+            %Check if there's data
+        if ~isempty(userDataTime) || ~isempty(userDataClick) || ~isempty(userDataTrans)
+
             %Analysis of data based on selected participants and parameters 
             %Call Search cretieria to find new values
+
+            %Time    
             [dataStartInput.String,dataEndInput.String,selectedDataTime,criteriaUsers] = searchCritera(userDataTime,uniqueUsers,selectedUsers,deviceData,paramTable.Data,dateInclTable.Data); %Sort Data
             selectedUsersCriteria = num2cell(ismember(uniqueUsers,criteriaUsers)); %Update selectedUsers
-            [resultTimeData,subRoutes] = analTimeFreqData_v2(uniqueUsers([selectedUsersCriteria{:,1}]),currentMetricValue,metricTime,selectedDataTime,selectRoute); %Perform Statistics
+            [resultTimeData,subRoutesTime] = analTimeFreqData_v2(uniqueUsers([selectedUsersCriteria{:,1}]),metricSplitTime,metricTime,selectedDataTime,selectRoute); %Perform Statistics
+
+            %Click
+            [~,~,selectedDataClickTrans,~] = searchCritera(userDataTrans,uniqueUsers,selectedUsers,deviceData,paramTable.Data,dateInclTable.Data); %Sort Data
+            [dataStartInput.String,dataEndInput.String,selectedDataClickUser,criteriaUsers] = searchCritera(userDataClick,uniqueUsers,selectedUsers,deviceData,paramTable.Data,dateInclTable.Data); %Sort Data
+            selectedUsersCriteria = num2cell(ismember(uniqueUsers,criteriaUsers)); %Update selectedUsers
+            [resultClickData,subRoutesClick] = analClickData_v2(uniqueUsers([selectedUsersCriteria{:,1}]),metricSplitClick,metricClick,selectedDataClickUser,selectedDataClickTrans,selectRoute); 
+
+            %Frequency 
+            [dataStartInput.String,dataEndInput.String,selectedDataFreq,criteriaUsers] = searchCritera(userDataTime,uniqueUsers,selectedUsers,deviceData,paramTable.Data,dateInclTable.Data); %Sort Data
+            selectedUsersCriteria = num2cell(ismember(uniqueUsers,criteriaUsers)); %Update selectedUsers
+            [resultFreqData,subRoutesFreq] = analTimeFreqData_v2(uniqueUsers([selectedUsersCriteria{:,1}]),metricSplitFreq,metricFreq,selectedDataFreq,selectRoute);
+
             if ~isempty(resultTimeData) && nansum([resultTimeData{:,2}]) > 0
-                %Write to UITable    
-                hTableData.ColumnName = [{'All Route'},{'Sub Route'},{currentMetricValue},{'STD'},{'SEM'},{'# Users'}]; %Create headers for table
-                hTableData.Data = resultTimeData(:,1:6); % route name, metric, number of observations 
+
+                %Time
+                hTableDataTime.ColumnName = [{'All Route'},{'Sub Route'},{metricSplitTime},{'STD'},{'SEM'},{'# Users'}]; %Create headers for table
+                hTableDataTime.Data = resultTimeData(:,1:6); % route name, metric, number of observations
+                %Click
+                hTableDataClick.ColumnName = [{'All Route'},{'Sub Route'},{metricSplitClick},{'STD'},{'SEM'},{'# Users'}]; %Create headers for table
+                hTableDataClick.Data = resultClickData(:,1:6); % route name, metric, number of observations 
+
+                %Freq
+                hTableDataFreq.ColumnName = [{'All Route'},{'Sub Route'},{metricSplitFreq},{'STD'},{'SEM'},{'# Users'}]; %Create headers for table
+                hTableDataFreq.Data = resultFreqData(:,1:6); % route name, metric, number of observations 
+
+                %{
+                plotAx = figure; 
+
                 %Create Graph
-                generateGraph_v2(resultTimeData(:,3:5),subRoutes,currentMetricTypeValue,currentMetricValue); % generate the graph
+                
+                if ~isempty(resultTimeData(:,3:5))
+                    dataAx1 = subplot(3,1,1);
+                    generateGraph_v3(dataAx1,resultTimeData(:,3:5),subRoutesTime,metricSplitTime); % generate the graph
+                end
+                
+                if ~isempty(resultClickData(:,3:5))
+                    dataAx2 = subplot(3,1,2);
+                    generateGraph_v3(dataAx2,resultClickData(:,3:5),subRoutesClick,metricSplitClick); % generate the graph
+                end
+                
+                if ~isempty(resultFreqData(:,3:5))
+                    dataAx3 = subplot(3,1,3);
+                    generateGraph_v3(dataAx3,resultFreqData(:,3:5),subRoutesFreq,metricSplitFreq); % generate the graph
+                end
+                %}
+                
+                exportDataButton_Callback; %Call export for each MainRoute - used to help Jerry 
+
                 fprintf("Complete\n");  
             else % if empty, print message
                 hMessageErrorData.Visible = 'on';
@@ -344,60 +413,8 @@ function generateMetricButton_Callback(source,eventdata)
             hMessageErrorData.Visible = 'on';
             fprintf('No result data %d\n',countNoData); 
             countNoData = countNoData + 1; %increment
-        end       
-    elseif strcmp(currentMetricTypeValue,metricType{1,2}) %Click       
-        %Acquire CLICK data        
-        assignin('base','userClickData',userDataClick);  % assign the following variables to the main workspace to be used elsewhere
-        assignin('base','userTransData',userDataTrans);  % assign the following variables to the main workspace to be used elsewhere
-        %Check if there's data
-        if ~isempty(userDataClick) || ~isempty(userDataTrans)
-            %Analysis of data based on selected participants and parameters 
-            %Call Search cretieria to find new values
-            [~,~,selectedDataClickTrans,~] = searchCritera(userDataTrans,uniqueUsers,selectedUsers,deviceData,paramTable.Data,dateInclTable.Data); %Sort Data
-            [dataStartInput.String,dataEndInput.String,selectedDataClickUser,criteriaUsers] = searchCritera(userDataClick,uniqueUsers,selectedUsers,deviceData,paramTable.Data,dateInclTable.Data); %Sort Data
-            selectedUsersCriteria = num2cell(ismember(uniqueUsers,criteriaUsers)); %Update selectedUsers
-            [resultClickData,subRoutes] = analClickData_v2(uniqueUsers([selectedUsersCriteria{:,1}]),currentMetricValue,metricClick,selectedDataClickUser,selectedDataClickTrans,selectRoute);
-            if ~isempty(resultClickData) && nansum([resultClickData{:,2}]) > 0
-                %Write to UITable    
-                hTableData.ColumnName = [{'All Route'},{'Sub Route'},{currentMetricValue},{'STD'},{'SEM'},{'# Users'}]; %Create headers for table
-                hTableData.Data = resultClickData(:,1:6); % route name, metric, number of observations 
-                %Create Graph
-                generateGraph_v2(resultClickData(:,3:5),subRoutes,currentMetricTypeValue,currentMetricValue); % generate the graph
-                fprintf("Complete\n"); 
-            else % if empty, print message
-                hMessageErrorData.Visible = 'on';
-                fprintf('No result data %d\n',countNoData); 
-                countNoData = countNoData + 1; %increment
-            end  
-        else % if empty, print message
-            hMessageErrorData.Visible = 'on';
-            fprintf('No result data %d\n',countNoData); 
-            countNoData = countNoData + 1; %increment
-        end    
-    elseif strcmp(currentMetricTypeValue,metricType{1,3}) %Frequency
-        if ~isempty(userDataTime)
-            %Analysis of data based on selected participants   
-            [dataStartInput.String,dataEndInput.String,selectedDataFreq,criteriaUsers] = searchCritera(userDataTime,uniqueUsers,selectedUsers,deviceData,paramTable.Data,dateInclTable.Data); %Sort Data
-            selectedUsersCriteria = num2cell(ismember(uniqueUsers,criteriaUsers)); %Update selectedUsers
-            [resultFreqData,subRoutes] = analTimeFreqData_v2(uniqueUsers([selectedUsersCriteria{:,1}]),currentMetricValue,metricFreq,selectedDataFreq,selectRoute);
-            if ~isempty(resultFreqData) && nansum([resultFreqData{:,2}]) > 0
-                %Write to UITable    
-                hTableData.ColumnName = [{'All Route'},{'Sub Route'},{currentMetricValue},{'STD'},{'SEM'},{'# Users'}]; %Create headers for table
-                hTableData.Data = resultFreqData(:,1:6); % route name, metric, number of observations 
-                %Create Graph
-                generateGraph_v2(resultFreqData(:,3:5),subRoutes,currentMetricTypeValue,currentMetricValue); % generate the graph
-                fprintf("Complete\n"); 
-            else % if empty, print message
-                hMessageErrorData.Visible = 'on';
-                fprintf('No result data %d\n',countNoData);
-                countNoData = countNoData + 1; %increment
-            end  
-        else % if empty, print message
-            hMessageErrorData.Visible = 'on';
-            fprintf('No result data %d\n',countNoData); 
-            countNoData = countNoData + 1; %increment
-        end    
-    end  
+        end     
+    end
 end
 
 %% Date Selection
@@ -515,8 +532,11 @@ function deselectAllUser_Callback(source,eventdata)
     % Empty all checkboxes
     selectedUsers(:,1) = {false}; %update - deselect all users == 0
     userSelectionTable.Data = [uniqueUsers,selectedUsers];
-    hTableData.Data = {};
-    cla;
+    hTableDataTime.Data = {};
+    hTableDataClick.Data = {};
+    hTableDataFreq.Data = {};
+    
+    cla; %Clear are data
 end
 
 % ---------------- Select and Deselect Users -----------------------------
@@ -569,55 +589,80 @@ function exportDataButton_Callback(source,eventdata)
           fullImName = horzcat(fullImName,'-',num2str(numFile)); 
        end
     end
-       
-    xlswrite(outputFile,{'Route',selectRoute,'Type',currentMetricTypeValue,'Metric',currentMetricValue},sheetName,'A1:F1'); %Write Route,Type,Metric
-    if ~isempty(hTableData.Data)
-        xlswrite(outputFile,[hTableData.ColumnName';hTableData.Data],sheetName, ... 
-            horzcat('A3:F',num2str(3+size(hTableData.Data,1)))); %Write Data Table
-    end
     
+    %Account for all tables
+    splitMetric = strsplit(currentMetricValue,' ');
+    splitMetric{2} = 'METRIC';
+    splitMetric = strjoin(splitMetric,' ');
+    xlswrite(outputFile,{'Route',selectRoute,'Type','All', 'Metric',splitMetric},sheetName,'A1:F1'); %Write Route,Type,Metric
+    %Combine all data tables into one
+%     allDataTable = [hTableDataTime.ColumnName'; hTableDataTime.Data; ...
+%         hTableDataClick.ColumnName'; hTableDataClick.Data; ...
+%         hTableDataFreq.ColumnName'; hTableDataFreq.Data];
+
+    dataTime = [hTableDataTime.ColumnName'; hTableDataTime.Data];
+    dataClick = [hTableDataClick.ColumnName'; hTableDataClick.Data];
+    dataFreq = [hTableDataFreq.ColumnName'; hTableDataFreq.Data];
+    
+    
+    tableSzTime = 2 + size(dataTime,1); 
+    xlswrite(outputFile,dataTime,sheetName, ... 
+        horzcat('A3',':F',num2str(tableSzTime))); %Write Data Table
+    
+    tableSzClick = 2 + size(dataClick,1); 
+    xlswrite(outputFile,dataClick,sheetName, ... 
+        horzcat('H3',':M',num2str(tableSzClick))); %Write Data Table
+    
+    tableSzFreq = 2 + size(dataFreq,1); 
+    xlswrite(outputFile,dataFreq,sheetName, ... 
+        horzcat('O3',':T',num2str(tableSzFreq))); %Write Data Table
+          
     xlswrite(outputFile,[userSelectionTable.ColumnName';userSelectionTable.Data([userSelectionTable.Data{:,2}],:)],sheetName, ... 
-        horzcat('H3:I',num2str(3+size(userSelectionTable.Data([userSelectionTable.Data{:,2}]),2)))); %Write User Selected Table
+        horzcat('V3:W',num2str(2+size(userSelectionTable.Data([userSelectionTable.Data{:,2}]),2)))); %Write User Selected Table
     
     if ~isempty(paramTable.Data)
         xlswrite(outputFile,[paramTable.ColumnName';paramTable.Data([paramTable.Data{:,3}],:)], sheetName, ... 
-            horzcat('K3:M',num2str(3+size(paramTable.Data([paramTable.Data{:,3}]),2)))); %Write Param Table
+            horzcat('X3:Z',num2str(2+size(paramTable.Data([paramTable.Data{:,3}]),2)))); %Write Param Table
     end
     
     if ~isempty(dateInclTable.Data)
         xlswrite(outputFile,[dateInclTable.ColumnName';dateInclTable.Data([dateInclTable.Data{:,3}],:)], ... 
-            horzcat('O3:Q',num2str(3+size(dateInclTable.Data([dateInclTable.Data{:,3}]),2)))); %Write Inclusion Time Table
+            horzcat('AB3:AE',num2str(2+size(dateInclTable.Data([dateInclTable.Data{:,3}]),2)))); %Write Inclusion Time Table
     end
     
             
-    %Export figure to pdf
-    hChart.Units = 'pixels'; 
-    pos = hChart.Position; 
-    %Change the axes units to pixels and store the Position and TightInset property values for the axes. 
-    %The TighInset property is a four-element vector of the form [left bottom right top]. 
-    %The values are the margins used around the axes for the tick values and text labels.
-    ti = hChart.TightInset;
-    %Create a four-element vector, rect, that defines a rectangular area covering the axes plus the automatically calculated margin. 
-    %The first two elements of rect specify the lower left corner of the rectangle relative to the lower left corner of the axes. 
-    %The last two elements of rect specify the width and height of the rectangle.
-    rect = [-ti(1), -ti(2), pos(3)+ti(1)+ti(3), pos(4)+ti(2)+ti(4)];
-    F = getframe(hChart,rect);
-    h = figure;
-    set(h,'visible','off','Color', 'white');
-    imshow(F.cdata);
-    print(h,'-depsc2','-painters','-r1000',fullImName); %add to .eps
-%     print(h,'-dpdf','-painters','-r1000','-bestfit',horzcat(outputDir,'\ExportIM\',sheetName)); %add to .pdf
-%     print(h,'-djpeg','-r1000',horzcat(fileName,'.jpg')); %add to .jpg    
-    print(h,'-dpng','-painters','-r1000',fullImName); %add to .png
+    %Export figure of graphs 
+    %{
+    if isempty(plotAx.Children)
+        plotAx.Units = 'pixels'; 
+        pos = plotAx.Position; 
+        %Change the axes units to pixels and store the Position and TightInset property values for the axes. 
+        %The TighInset property is a four-element vector of the form [left bottom right top]. 
+        %The values are the margins used around the axes for the tick values and text labels.
+        ti = plotAx.TightInset;
+        %Create a four-element vector, rect, that defines a rectangular area covering the axes plus the automatically calculated margin. 
+        %The first two elements of rect specify the lower left corner of the rectangle relative to the lower left corner of the axes. 
+        %The last two elements of rect specify the width and height of the rectangle.
+        rect = [-ti(1), -ti(2), pos(3)+ti(1)+ti(3), pos(4)+ti(2)+ti(4)];
+        F = getframe(plotAx,rect);
+        h = figure;
+        set(h,'visible','off','Color', 'white');
+        imshow(F.cdata);
+        print(h,'-depsc2','-painters','-r1000',fullImName); %add to .eps
+    %     print(h,'-dpdf','-painters','-r1000','-bestfit',horzcat(outputDir,'\ExportIM\',sheetName)); %add to .pdf
+    %     print(h,'-djpeg','-r1000',horzcat(fileName,'.jpg')); %add to .jpg    
+        print(h,'-dpng','-painters','-r1000',fullImName); %add to .png
+    end
+    %}
     
-    %Copy figure to excel;
+    %Copy Main matlab GUI figure to excel;
     f2=copyobj(f,0);
     set(f2,'visible','off');
     %Find size of f2
     f2.Units = 'pixels';
     posF2 = get(f2, 'Position');
     %Write image of figure to specified cell
-    xlsPasteTo(f2,outputFile,sheetName,posF2(3),posF2(4),'T2'); %Print Entire Figure - used for reference
+    xlsPasteTo(f2,outputFile,sheetName,posF2(3),posF2(4),'O20'); %Print Entire Figure - used for reference
     
     fprintf('... Data transfer to Excel completed\n');
 

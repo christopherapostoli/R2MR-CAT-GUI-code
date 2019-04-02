@@ -1,4 +1,4 @@
-function [resultClickData,subRoutes] = analClickData_v2(selectedUsers,currentMetricValue,metric,userClickData,userTransData,selectRoute)
+function [resultClickData,subRoutes,subRoutesParse] = analClickData_v2(selectedUsers,currentMetricValue,metric,userClickData,userTransData,selectRoute)
 
 %% Per page analysis
 %Now that the click data and trans data has been sorted by time, lets match
@@ -12,6 +12,24 @@ allRoutes = unique(cellfun(@num2str,{userTransData.currFromPage,userTransData.cu
 %Find all subroutes
 indMainRoute = strcmp(regexp(allRoutes, '[^.]+(?<=.)', 'match', 'once'),selectRoute);
 subRoutes = allRoutes(indMainRoute);
+
+%Find main route
+try 
+    %Multiple routes exist
+    routeSubApp = strsplit(subRoutes{1},'.');
+    mainRoute = routeSubApp{1};
+    %Remove main Route from all route names if there is another proceeding field 
+    if any(contains(subRoutes,horzcat(mainRoute,'.')) & cellfun('length',subRoutes)-length(mainRoute) >= 1)
+        idxRoutes = (contains(subRoutes,horzcat(mainRoute,'.')) & cellfun('length',subRoutes)-length(mainRoute) >= 1);
+        subRoutesParse = erase(subRoutes(idxRoutes),horzcat(mainRoute,'.'));
+    else
+        subRoutesParse = subRoutes;
+    end
+catch
+    %There is only on route, set vars to the one route
+    mainRoute = subRoutes;
+    subRoutesParse = subRoutes; 
+end
 
 %Initialize
 pageCurr = {}; 
@@ -186,31 +204,32 @@ if ~isempty(userClickPage) %Make sure there is data
         end
     end
 
-    resultClickData = cell(size(subRoutes,2),4);
+    resultClickData = cell(size(subRoutes,2),8);
     % Analyse Data
     for i = 1:size(subRoutes,2)
 
         %Find index of users selected
         indUser = strcmp(outputClick.userID,selectedUsers(:,1));
-        resultClickData(i,1) = subRoutes(i); %Route name
+        resultClickData(i,1) = {mainRoute}; %All Route name
+        resultClickData(i,2) = subRoutesParse(i); %Sub Route name
 
         % Generate Table with appropriate column names based on metric
         if strcmp(currentMetricValue,metric(1)) %'Total Clicks'
             indNonZeroNaN = (outputClick.totalClicksSum(indUser,i) ~= 0) & ~isnan(outputClick.totalClicksSum(indUser,i)); %Index of non zero inputs
-            resultClickData{i,2} = nansum(outputClick.totalClicksSum(indNonZeroNaN,i)); %Value = sum
-            resultClickData{i,3} = nanstd(outputClick.totalClicksSum(indNonZeroNaN,i)); %Value = std
-            resultClickData{i,4} = nanstd(outputClick.totalClicksSum(indNonZeroNaN,i))/sqrt(length(outputClick.totalClicksSum(indNonZeroNaN,i))); %Value = sem
-            resultClickData{i,5} = sum(indNonZeroNaN); %Value = num of users
-            resultClickData{i,6} = selectedUsers(indNonZeroNaN,1); %Value = users in data
-            resultClickData{i,7} = selectedUsers(~indNonZeroNaN,1); %Value = users not in data
+            resultClickData{i,3} = nansum(outputClick.totalClicksSum(indNonZeroNaN,i)); %Value = sum
+            resultClickData{i,4} = nanstd(outputClick.totalClicksSum(indNonZeroNaN,i)); %Value = std
+            resultClickData{i,5} = nanstd(outputClick.totalClicksSum(indNonZeroNaN,i))/sqrt(length(outputClick.totalClicksSum(indNonZeroNaN,i))); %Value = sem
+            resultClickData{i,6} = sum(indNonZeroNaN); %Value = num of users
+            resultClickData{i,7} = selectedUsers(indNonZeroNaN,1); %Value = users in data
+            resultClickData{i,8} = selectedUsers(~indNonZeroNaN,1); %Value = users not in data
         elseif strcmp(currentMetricValue,metric(2)) %'Average clicks per user'
             indNonZeroNaN = (outputClick.totalClicksSum(indUser,i) ~= 0) & ~isnan(outputClick.totalClicksSum(indUser,i)); %Index of non zero inputs
-            resultClickData{i,2} = nanmean(outputClick.totalClicksSum(indNonZeroNaN,i)); %Value = sum
-            resultClickData{i,3} = nanstd(outputClick.totalClicksSum(indNonZeroNaN,i)); %Value = std
-            resultClickData{i,4} = nanstd(outputClick.totalClicksSum(indNonZeroNaN,i))/sqrt(length(outputClick.totalClicksSum(indNonZeroNaN,i))); %Value = sem
-            resultClickData{i,5} = sum(indNonZeroNaN); %Value = num of users
-            resultClickData{i,6} = selectedUsers(indNonZeroNaN,1); %Value = users
-            resultClickData{i,7} = selectedUsers(~indNonZeroNaN,1); %Value = users not in data
+            resultClickData{i,3} = nanmean(outputClick.totalClicksSum(indNonZeroNaN,i)); %Value = sum
+            resultClickData{i,4} = nanstd(outputClick.totalClicksSum(indNonZeroNaN,i)); %Value = std
+            resultClickData{i,5} = nanstd(outputClick.totalClicksSum(indNonZeroNaN,i))/sqrt(length(outputClick.totalClicksSum(indNonZeroNaN,i))); %Value = sem
+            resultClickData{i,6} = sum(indNonZeroNaN); %Value = num of users
+            resultClickData{i,7} = selectedUsers(indNonZeroNaN,1); %Value = users - not in table
+            resultClickData{i,8} = selectedUsers(~indNonZeroNaN,1); %Value = users not in data - not in table
     %     elseif strcmp(currentMetricValue,metric(3)) %'Average click per visit'
     %         resultClickData{i,2} = nansum(outputClick.avgTimePerPage(indUser,i)); %Value = sum
     %         resultClickData{i,3} = nanstd(outputClick.avgTimePerPage(indUser,i)); %Value = std
@@ -224,17 +243,17 @@ if ~isempty(userClickPage) %Make sure there is data
         elseif strcmp(currentMetricValue,metric(5)) %'Percentage of clicks on sub-app'
             totalClick = nansum(nansum(outputClick.totalClickPagePercent)); %Total click in all subapps as a percent
             indNonZeroNaN = (outputClick.totalClickPagePercent(indUser,i) ~= 0) & ~isnan(outputClick.totalClickPagePercent(indUser,i)); %Index of non zero inputs
-            resultClickData{i,2} = nansum(outputClick.totalClickPagePercent(indNonZeroNaN,i))/totalClick; %Value = sum
-            resultClickData{i,3} = nanstd(outputClick.totalClickPagePercent(indNonZeroNaN,i)); %Value = std
-            resultClickData{i,4} = nanstd(outputClick.totalClickPagePercent(indNonZeroNaN,i))/sqrt(length(outputClick.totalClickPagePercent(indNonZeroNaN,i))); %Value = sem
-            resultClickData{i,5} = sum(indNonZeroNaN); %Value = num of users
-            resultClickData{i,6} = selectedUsers(indNonZeroNaN,1); %Value = users
-            resultClickData{i,7} = selectedUsers(~indNonZeroNaN,1); %Value = users not in data
+            resultClickData{i,3} = nansum(outputClick.totalClickPagePercent(indNonZeroNaN,i))/totalClick; %Value = sum
+            resultClickData{i,4} = nanstd(outputClick.totalClickPagePercent(indNonZeroNaN,i)); %Value = std
+            resultClickData{i,5} = nanstd(outputClick.totalClickPagePercent(indNonZeroNaN,i))/sqrt(length(outputClick.totalClickPagePercent(indNonZeroNaN,i))); %Value = sem
+            resultClickData{i,6} = sum(indNonZeroNaN); %Value = num of users
+            resultClickData{i,7} = selectedUsers(indNonZeroNaN,1); %Value = users
+            resultClickData{i,8} = selectedUsers(~indNonZeroNaN,1); %Value = users not in data
         end
 
     end
 else
-    resultClickData = [];
+    resultClickData = cell(size(subRoutes,2),8);
 end
     
     

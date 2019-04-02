@@ -22,7 +22,9 @@ addpath('code-extraction','code-analysis','data'); % add all (sub)folders to sea
 % analyze should be in the main workspace
 % outputDir = 'C:\Users\christopher.apostoli\Documents\Josh Granek\MATLAB Script Package_Chris\MatLAB Scripts_V6\MatLAB Scripts_V5\R2MR_CAT_Output.xlsx'; %Master File
 % outputDir = 'C:\Users\apostoli\Documents\GitHub\R2MR-CAT-GUI-code\data\R2MR_CAT_Output.xlsx'; %At home - Master spreadsheet;
-outputDir = 'C:\Users\christopher.apostoli\Documents\GitHub\R2MR-CAT-GUI-code\code-analysis'; %At work computer - Master spreadsheet;
+% outputDir = 'C:\Users\christopher.apostoli\Documents\GitHub\R2MR-CAT-GUI-code\data'; %At work computer - Master spreadsheet;
+outputDir = uigetdir('','Please select folder where data will be output');
+fprintf('Folder selected: %s\n',outputDir);
 
 %Use as default
 % fileList =     [{'analytics_CAT_User2.txt'}    {'data_CAT_User2.txt'}
@@ -46,10 +48,10 @@ deviceDataUnique = deviceData(indData,:);
 % save('exports/allUserData.mat','allUserData');
 % save('exports/allUserEvents.mat','deviceEvents');
 % disp('allUsers saved in exports folder');
-
+fprintf('Creating GUI ...\n');
 % at this point, you've picked your files, you've parsed them to get a cell
 % array full of events, and now you're ready to create the GUI and perform analyses
 %create_time_UI_v4(deviceEvents,currentAppValue);
-GUI_Analysis_v2(deviceEvents,deviceDataUnique,currentAppValue,outputDir);
-
+%GUI_Analysis_v2(deviceEvents,deviceDataUnique,currentAppValue,outputDir);
+GUI_Analysis_v3(deviceEvents,deviceDataUnique,currentAppValue,outputDir);
 

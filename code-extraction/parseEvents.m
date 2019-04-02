@@ -21,7 +21,7 @@ function deviceData = parseEvents(file)
     counter = 1;
     fid = fopen(file); % opens the file for binary read access
     
-    if strcmp(file,'analytics_CAT_User2.txt') || strcmp(file,'analytics_CAT_User4.txt') % these file was formatted weirdly and is handled differently (a very specific instance)
+    if contains(file,'analytics_CAT_User2.txt') || contains(file,'analytics_CAT_User4.txt') % these file was formatted weirdly and is handled differently (a very specific instance)
         fileContents = fscanf(fid,'%s');
         fileContents = fileContents(4:end); % there are some weird characters before the JSON proper starts
         value = jsondecode(fileContents);
@@ -33,7 +33,7 @@ function deviceData = parseEvents(file)
             % Add files beginning with "docs" to JSON (get rid of the
             % database information and the "docs" breaks). Breaks it into cells
             % each containing 50 'sequences' of information
-            if strfind(tline,'"docs"')
+            if contains(tline,'"docs"')
                 JSON{i} = tline;
                 i = i + 1;
             end
