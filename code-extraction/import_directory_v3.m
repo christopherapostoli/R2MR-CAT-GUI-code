@@ -31,7 +31,7 @@ function [fileList,currentAppValue] = import_directory_v3
     end
 
     %Show user
-    fprintf('ANALYSIS file chosen: %s\n',analFiles{:});
+    fprintf('ANALYTICS file chosen: %s\n',analFiles{:});
     fprintf('DATA files chosen: %s\n',datFiles{:});
     
     % checks if the user pressed cancel, or made an incorrect selection    
