@@ -1,4 +1,4 @@
-function GUI_Analysis_v2(deviceEvents,deviceData,currentAppValue,outputDir)
+function GUI_Analysis_v3(deviceEvents,deviceData,currentAppValue,outputDir)
 % creates a UI with a graph and table detailing the time
 % spent per route, depending on the name of the selected route
 
