@@ -5,6 +5,7 @@ function [userDataTime,mainRoutes] = getTimeData_v2(deviceEvents,uniqueUsers)
 % Get details of transition, pause and resume events
 desiredEvents = {'transition','pause','resume'};
 time= {}; %Need to find starting time
+timeSTR = {};
 type= {};
 destination ={};
 source = {};
@@ -18,6 +19,7 @@ for i = 1:size(deviceEvents,1) % for each device
                if ~isempty(deviceEvents{i,1}{1,j}.related_user) && any(strcmp(deviceEvents{i,1}{1,j}.related_user,uniqueUsers)) % only consider events with users - if it doesn't have one, it's probably startup  % only consider events with users - if it doesn't have one, it's probably startup
                    timeFormatted = format_time(deviceEvents{i,1}{1,j}.timestamp); % format the string timestamp into date and time
                    time = [time; timeFormatted]; %store time
+                   timeSTR = [timeSTR; {datestr(timeFormatted)}]; %add time as string
                    type = [type; deviceEvents{i,1}{1,j}.type]; % store the type of event
                    if strcmp(type(end),'transition') % if it's a transition, log the to and from routeSubApp
                        destination = [destination;deviceEvents{i,1}{1,j}.details.to];
@@ -29,7 +31,7 @@ for i = 1:size(deviceEvents,1) % for each device
                        end
                    elseif strcmp(type(end),'pause')
                        destination = [destination;'NaN'];      
-                       source = [source;NaN];
+                       source = [source;'NaN'];
                    elseif strcmp(type(end),'resume')
                        destination = [destination;'NaN'];
                        source = [source;'NaN'];
@@ -48,10 +50,13 @@ for i = 1:size(deviceEvents,1) % for each device
 end
 
 % eventLog: cell array containing timestamp, time, to and from for each event sorted in chronological order
-T = table(time,type,source,destination,userID);
-userDataTime = table2struct(sortrows(T,1)); % Sort events by timestamp and convert to a cell structure
-
-
+T = table(time,type,source,destination,userID,timeSTR);
+T = sortrows(T,1); 
+[~,unqRows,~] = unique(T(:,2:6),'first');
+T = T(unqRows,:); %Sort then take onl unique rows, remove duplicates
+T = sortrows(T,1); 
+userDataTime = table2struct(T); % Sort events by timestamp and convert to a cell structure
+ 
 %% Find Routes entered by User
 
 %Find all routes 

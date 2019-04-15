@@ -1,10 +1,11 @@
-function [userDataClick,userDataTrans] = getClickData_v2(deviceEvents,uniqueUsers)
+function [userDataClick,userDataTrans,totDataUnique] = getClickData_v2(deviceEvents,uniqueUsers)
 
 %% Prepare Data
 %Seperate data based on click consideration
 % Get details of clicks
 desiredEvents = {'transition','click'};
 time={};
+timeStr = {}; 
 type={};
 posX={};
 posY = {};
@@ -55,6 +56,7 @@ for i = 1:size(deviceEvents,1) % for each device
                elseif strcmp(deviceEvents{i,1}{1,j}.type,desiredEvents{1,2})  % check if Click
                    timeFormatted = format_time(deviceEvents{i,1}{1,j}.timestamp); % format the string timestamp into date and time
                    time = [time; timeFormatted]; %store time
+                   timeStr = [timeStr; {datestr(timeFormatted)}]; %string of date
                    type = [type; deviceEvents{i,1}{1,j}.type]; % store the type of event == click
                    posX = [posX; deviceEvents{i,1}{1,j}.details.x]; % store x position
                    posY = [posY; deviceEvents{i,1}{1,j}.details.y]; % store y position
@@ -86,18 +88,21 @@ end
 
 %Sort clicks with time
 totData = sortrows(cell2table(totData,'VariableNames',{'Time','FromPage','ToPage'}),1); %Sort by date
+totDataUnique = unique(totData,'first'); %Remove any rows that were repeated due to files with same data
 %Determine the previous 'to' page and fill it in as 'from' when determing
 %href locations
-indHRefFrom = find(strcmp(totData.FromPage(:),'') == 1);
-for i = indHRefFrom
-   totData.FromPage{i} = totData.ToPage{i-1}; 
-end
-    
+indHRefFrom = find(strcmp(totDataUnique.FromPage(:),'') == 1);    
+% totDataUnique.FromPage(indHRefFrom) = totDataUnique.ToPage(indHRefFrom - 1);
 
 % eventLog: cell array containing timestamp, time, to and from for each event sorted in chronological order
-T = table(time,type,posX,posY,target,userID);
+T = table(time,type,posX,posY,target,userID,timeStr);
+T = sortrows(T,1); 
+[~,unqRows,~] = unique(T(:,5:7),'first');
+T = T(unqRows,:); %Sort then take onl unique rows, remove duplicates
+T = sortrows(T,1); 
+userDataClick = table2struct(T); % Sort events by timestamp and convert to a cell structure
 % userDataClick = table2struct(sortrows(T,1),'ToScalar',true); % Sort events by timestamp and convert to a cell structure
-userDataClick = table2struct(sortrows(T,1)); % Sort events by timestamp and convert to a cell structure
+% userDataClick = table2struct(sortrows(T,1)); % Sort events by timestamp and convert to a cell structure
 
 %Transition events match
 time = timeTrans; %Change var name so it's easier for searching 

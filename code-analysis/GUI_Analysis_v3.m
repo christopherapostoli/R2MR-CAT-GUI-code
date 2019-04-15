@@ -33,7 +33,7 @@ assignin('base','uniqueUsers',uniqueUsers);  % assign the following variables to
 %% Create Data Tables for TIME, CLICK and FREQUENCY
 %Call functions to output tables
 [userDataTime,mainRoutes] = getTimeData_v2(deviceEvents,uniqueUsers); %all TIME data
-[userDataClick,userDataTrans] = getClickData_v2(deviceEvents,uniqueUsers);
+[userDataClick,userDataTrans,totDataUnique] = getClickData_v2(deviceEvents,uniqueUsers);
 selectRoute = mainRoutes{1};
 %% Create and Add UI components
 
