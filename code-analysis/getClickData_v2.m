@@ -91,7 +91,7 @@ totData = sortrows(cell2table(totData,'VariableNames',{'Time','FromPage','ToPage
 totDataUnique = unique(totData,'first'); %Remove any rows that were repeated due to files with same data
 %Determine the previous 'to' page and fill it in as 'from' when determing
 %href locations
-indHRefFrom = find(strcmp(totDataUnique.FromPage(:),'') == 1);    
+% indHRefFrom = find(strcmp(totDataUnique.FromPage(:),'') == 1);    
 % totDataUnique.FromPage(indHRefFrom) = totDataUnique.ToPage(indHRefFrom - 1);
 
 % eventLog: cell array containing timestamp, time, to and from for each event sorted in chronological order

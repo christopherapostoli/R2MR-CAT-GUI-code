@@ -32,13 +32,8 @@ assignin('base','uniqueUsers',uniqueUsers);  % assign the following variables to
 
 %% Create Data Tables for TIME, CLICK and FREQUENCY
 %Call functions to output tables
-
-%Time
 [userDataTime,mainRoutes] = getTimeData_v3(deviceEvents,uniqueUsers); %all TIME data
-selectRoute = mainRoutes{1}; %Default to first route
-
-%Click 
-userDataClick = getClickData_v3(deviceEvents,uniqueUsers);
+[userDataClick,userDataTrans,totDataUnique] = getClickData_v3(deviceEvents,uniqueUsers);
 %Find page where click occured
 for cl = 1:size(userDataClick,1)
    indFirst = find([userDataTime(:).time] < userDataClick(cl).time, 1, 'last' );
@@ -55,16 +50,13 @@ for cl = 1:size(userDataClick,1)
    end
 end
 
-% %For Debugging purposes:
-% %Combine Time data with click data to compare if sort makes sense
-% tempClick = struct2table(userDataClick);
-% tempTime = struct2table(userDataTime);
-% tempAllData = [tempTime.timeStr, tempTime.type,tempTime.source,tempTime.destination; ...
-%     tempClick.timeStr, tempClick.type,tempClick.currPage,tempClick.currPage]; 
-% tempAllData = sortrows(tempAllData,1); %Sort Data
+%For Debugging purposes:
+%Combine Time data with click data to compare if sort makes sense
+tempClick = struct2table(userDataClick);
+tempTime = struct2table(userDataTime);
+tempAllData = [tempTime.time, tim]; 
 
-
-
+selectRoute = mainRoutes{1};
 %% Create and Add UI components
 
 % Create figure UI window
@@ -346,7 +338,7 @@ end
 function generateMetricButton_Callback(source,eventdata)
     
     for m = 1:length(mainRoutes)
-%     for m = 8:8
+%     for m = 9:9
         
         selectRoute = mainRoutes{m};
         
@@ -373,10 +365,11 @@ function generateMetricButton_Callback(source,eventdata)
         %Acquire CLICK data        
         assignin('base','userTimeData',userDataTime);  % assign the following variables to the main workspace to be used elsewhere
         assignin('base','userClickData',userDataClick);  % assign the following variables to the main workspace to be used elsewhere
+        assignin('base','userTransData',userDataTrans);  % assign the following variables to the main workspace to be used elsewhere
 
         %Determine Time and Users to include
             %Check if there's data
-        if ~isempty(userDataTime) || ~isempty(userDataClick) 
+        if ~isempty(userDataTime) || ~isempty(userDataClick) || ~isempty(userDataTrans)
 
             %Analysis of data based on selected participants and parameters 
             %Call Search cretieria to find new values
@@ -387,9 +380,10 @@ function generateMetricButton_Callback(source,eventdata)
             [resultTimeData,subRoutesTime] = analTimeFreqData_v3(uniqueUsers([selectedUsersCriteria{:,1}]),metricSplitTime,metricTime,selectedDataTime,selectRoute); %Perform Statistics
 
             %Click
+            [~,~,selectedDataClickTrans,~] = searchCritera(userDataTrans,uniqueUsers,selectedUsers,deviceData,paramTable.Data,dateInclTable.Data); %Sort Data
             [dataStartInput.String,dataEndInput.String,selectedDataClickUser,criteriaUsers] = searchCritera(userDataClick,uniqueUsers,selectedUsers,deviceData,paramTable.Data,dateInclTable.Data); %Sort Data
             selectedUsersCriteria = num2cell(ismember(uniqueUsers,criteriaUsers)); %Update selectedUsers
-            [resultClickData,subRoutesClick] = analClickData_v3(uniqueUsers([selectedUsersCriteria{:,1}]),metricSplitClick,metricClick,selectedDataClickUser,selectRoute); 
+            [resultClickData,subRoutesClick] = analClickData_v3(uniqueUsers([selectedUsersCriteria{:,1}]),metricSplitClick,metricClick,selectedDataClickUser,selectedDataClickTrans,selectRoute); 
 
             %Frequency 
             [dataStartInput.String,dataEndInput.String,selectedDataFreq,criteriaUsers] = searchCritera(userDataTime,uniqueUsers,selectedUsers,deviceData,paramTable.Data,dateInclTable.Data); %Sort Data
@@ -684,24 +678,24 @@ function exportDataButton_Callback(source,eventdata)
 %     end
 
     %Export figure to pdf
-%     hChart.Units = 'pixels'; 
-%     pos = hChart.Position; 
-%     %Change the axes units to pixels and store the Position and TightInset property values for the axes. 
-%     %The TighInset property is a four-element vector of the form [left bottom right top]. 
-%     %The values are the margins used around the axes for the tick values and text labels.
-%     ti = hChart.TightInset;
-%     %Create a four-element vector, rect, that defines a rectangular area covering the axes plus the automatically calculated margin. 
-%     %The first two elements of rect specify the lower left corner of the rectangle relative to the lower left corner of the axes. 
-%     %The last two elements of rect specify the width and height of the rectangle.
-%     rect = [-ti(1), -ti(2), pos(3)+ti(1)+ti(3), pos(4)+ti(2)+ti(4)];
-%     F = getframe(hChart,rect);
-%     h = figure;
-%     set(h,'visible','on','Color', 'white');
-%     imshow(F.cdata);
-%     print(h,'-depsc2','-painters','-r1000',fullImName); %add to .eps
-% %     print(h,'-dpdf','-painters','-r1000','-bestfit',horzcat(outputDir,'\ExportIM\',sheetName)); %add to .pdf
-% %     print(h,'-djpeg','-r1000',horzcat(fileName,'.jpg')); %add to .jpg    
-%     print(h,'-dpng','-painters','-r1000',fullImName); %add to .png
+    hChart.Units = 'pixels'; 
+    pos = hChart.Position; 
+    %Change the axes units to pixels and store the Position and TightInset property values for the axes. 
+    %The TighInset property is a four-element vector of the form [left bottom right top]. 
+    %The values are the margins used around the axes for the tick values and text labels.
+    ti = hChart.TightInset;
+    %Create a four-element vector, rect, that defines a rectangular area covering the axes plus the automatically calculated margin. 
+    %The first two elements of rect specify the lower left corner of the rectangle relative to the lower left corner of the axes. 
+    %The last two elements of rect specify the width and height of the rectangle.
+    rect = [-ti(1), -ti(2), pos(3)+ti(1)+ti(3), pos(4)+ti(2)+ti(4)];
+    F = getframe(hChart,rect);
+    h = figure;
+    set(h,'visible','on','Color', 'white');
+    imshow(F.cdata);
+    print(h,'-depsc2','-painters','-r1000',fullImName); %add to .eps
+%     print(h,'-dpdf','-painters','-r1000','-bestfit',horzcat(outputDir,'\ExportIM\',sheetName)); %add to .pdf
+%     print(h,'-djpeg','-r1000',horzcat(fileName,'.jpg')); %add to .jpg    
+    print(h,'-dpng','-painters','-r1000',fullImName); %add to .png
     
     
     
